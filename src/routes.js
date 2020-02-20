@@ -11,6 +11,7 @@ const { Navigator, Screen } = createStackNavigator();
 const routes = () => (
   <NavigationContainer>
     <Navigator
+      initialRouteName="Main"
       screenOptions={{
         headerBackTitleVisible: false,
         headerTitleAlign: 'center',
@@ -21,7 +22,7 @@ const routes = () => (
       }}
     >
       <Screen name="User" component={User} />
-      <Screen name="Main" component={Main} />
+      <Screen name="Main" component={Main} options={{ title: 'Usuários' }} />
     </Navigator>
   </NavigationContainer>
 );
