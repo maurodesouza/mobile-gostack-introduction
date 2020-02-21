@@ -28,6 +28,7 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     'react/state-in-constructor': 'off',
+    'react/static-property-placement': 'off',
     'react/jsx-filename-extension': [
       'warn',
       {
