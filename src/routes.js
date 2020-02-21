@@ -21,7 +21,11 @@ const routes = () => (
         },
       }}
     >
-      <Screen name="User" component={User} />
+      <Screen
+        name="User"
+        component={User}
+        options={({ route }) => ({ title: route.params.user.name })}
+      />
       <Screen name="Main" component={Main} options={{ title: 'Usuários' }} />
     </Navigator>
   </NavigationContainer>
