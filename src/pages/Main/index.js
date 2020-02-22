@@ -17,6 +17,7 @@ import {
   Bio,
   ProfileButton,
   ProfileButtonText,
+  Delete,
 } from './styles';
 import api from '../../services/api';
 
@@ -50,6 +51,13 @@ export default class Main extends Component {
       AsyncStorage.setItem('users', JSON.stringify(users));
     }
   }
+
+  handleDeleteUser = user => {
+    const { users } = this.state;
+    this.setState({
+      users: users.filter(({ login }) => login !== user),
+    });
+  };
 
   handleAddUser = async () => {
     const { users, newUser } = this.state;
@@ -133,6 +141,10 @@ export default class Main extends Component {
           keyExtractor={user => user.login}
           renderItem={({ item }) => (
             <User>
+              <Delete
+                name="delete"
+                onPress={() => this.handleDeleteUser(item.login)}
+              />
               <Avatar source={{ uri: item.avatar }} />
               <Name>{item.name}</Name>
               <Bio>{item.bio}</Bio>
