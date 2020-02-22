@@ -4,11 +4,25 @@ import { ActivityIndicator } from 'react-native';
 import PropTypes from 'prop-types';
 import api from '../../services/api';
 
-import List from '../../components/List';
-import { Container, Header, Avatar, Name, Bio, Stars } from './styles';
+import {
+  Container,
+  Header,
+  Avatar,
+  Name,
+  Bio,
+  Stars,
+  Starred,
+  Info,
+  Author,
+  OwnerAvatar,
+  Title,
+} from './styles';
 
 export default class User extends Component {
   static propTypes = {
+    navigation: PropTypes.shape({
+      navigate: PropTypes.func,
+    }).isRequired,
     route: PropTypes.shape({
       params: PropTypes.shape({
         user: PropTypes.shape({
@@ -60,12 +74,6 @@ export default class User extends Component {
     return null;
   };
 
-  renderItem = ({ item }) => {
-    const { loading } = this.state;
-
-    return <List loading={loading} item={item} />;
-  };
-
   onRefresh = async () => {
     this.setState(
       { refreshing: true, page: 1, stars: [], noMoreStars: false },
@@ -73,9 +81,14 @@ export default class User extends Component {
     );
   };
 
+  webRepository = () => {
+    console.tron.log('Hmm ... Hellow ?');
+  };
+
   render() {
     const { stars, loading, refreshing } = this.state;
     const {
+      navigation,
       route: {
         params: { user },
       },
@@ -100,7 +113,22 @@ export default class User extends Component {
           refreshing={refreshing}
           data={stars}
           keyExtractor={star => String(star.id)}
-          renderItem={this.renderItem}
+          renderItem={({ item }) => (
+            <Starred
+              onPress={() =>
+                navigation.navigate('WebRepository', {
+                  uri: item.html_url,
+                  name: item.name,
+                })
+              }
+            >
+              <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+              <Info>
+                <Title>{item.name}</Title>
+                <Author>{item.owner.login}</Author>
+              </Info>
+            </Starred>
+          )}
         />
       </Container>
     );

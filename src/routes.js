@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import User from './pages/User';
 import Main from './pages/Main';
+import WebRepository from './pages/WebRepository';
 
 const { Navigator, Screen } = createStackNavigator();
 
@@ -27,6 +28,11 @@ const routes = () => (
         options={({ route }) => ({ title: route.params.user.name })}
       />
       <Screen name="Main" component={Main} options={{ title: 'Usuários' }} />
+      <Screen
+        name="WebRepository"
+        component={WebRepository}
+        options={({ route }) => ({ title: route.params.name })}
+      />
     </Navigator>
   </NavigationContainer>
 );
