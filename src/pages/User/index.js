@@ -4,19 +4,8 @@ import { ActivityIndicator } from 'react-native';
 import PropTypes from 'prop-types';
 import api from '../../services/api';
 
-import {
-  Container,
-  Header,
-  Avatar,
-  Name,
-  Bio,
-  Stars,
-  Starred,
-  OwnerAvatar,
-  Info,
-  Title,
-  Author,
-} from './styles';
+import List from '../../components/List';
+import { Container, Header, Avatar, Name, Bio, Stars } from './styles';
 
 export default class User extends Component {
   static propTypes = {
@@ -34,22 +23,46 @@ export default class User extends Component {
 
   state = {
     stars: [],
+    noMoreStars: false,
     loading: false,
+    page: 1,
   };
 
   async componentDidMount() {
+    this.loadRepositories();
+  }
+
+  loadRepositories = async () => {
+    const { page, stars, loading, noMoreStars } = this.state;
     const { route } = this.props;
     const { login } = route.params.user;
 
+    if (loading || noMoreStars) return null;
+
     this.setState({ loading: true });
 
-    const { data } = await api.get(`/users/${login}/starred`);
-
-    this.setState({
-      stars: data,
-      loading: false,
+    const { data } = await api.get(`/users/${login}/starred`, {
+      params: { page },
     });
-  }
+
+    if (data.length < 30) {
+      this.setState({ noMoreStars: true });
+    }
+
+    await this.setState({
+      stars: [...stars, ...data],
+      loading: false,
+      page: page + 1,
+    });
+
+    return null;
+  };
+
+  renderItem = ({ item }) => {
+    const { loading } = this.state;
+
+    return <List loading={loading} item={item} />;
+  };
 
   render() {
     const { stars, loading } = this.state;
@@ -67,23 +80,16 @@ export default class User extends Component {
           <Bio>{user.bio}</Bio>
         </Header>
 
-        {loading ? (
-          <ActivityIndicator color="#7159c1" size={60} style={{ flex: 1 }} />
-        ) : (
-          <Stars
-            data={stars}
-            keyExtractor={star => String(star.id)}
-            renderItem={({ item }) => (
-              <Starred>
-                <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-                <Info>
-                  <Title>{item.name}</Title>
-                  <Author>{item.owner.login}</Author>
-                </Info>
-              </Starred>
-            )}
-          />
-        )}
+        <Stars
+          ListFooterComponent={
+            loading && <ActivityIndicator color="#7159c1" size={30} />
+          }
+          onEndReachedThreshold={0.2}
+          onEndReached={this.loadRepositories}
+          data={stars}
+          keyExtractor={star => String(star.id)}
+          renderItem={this.renderItem}
+        />
       </Container>
     );
   }
