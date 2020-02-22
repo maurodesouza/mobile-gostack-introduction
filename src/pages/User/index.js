@@ -26,6 +26,7 @@ export default class User extends Component {
     noMoreStars: false,
     loading: false,
     page: 1,
+    refreshing: false,
   };
 
   async componentDidMount() {
@@ -53,6 +54,7 @@ export default class User extends Component {
       stars: [...stars, ...data],
       loading: false,
       page: page + 1,
+      refreshing: false,
     });
 
     return null;
@@ -64,8 +66,15 @@ export default class User extends Component {
     return <List loading={loading} item={item} />;
   };
 
+  onRefresh = async () => {
+    this.setState(
+      { refreshing: true, page: 1, stars: [], noMoreStars: false },
+      this.loadRepositories
+    );
+  };
+
   render() {
-    const { stars, loading } = this.state;
+    const { stars, loading, refreshing } = this.state;
     const {
       route: {
         params: { user },
@@ -82,10 +91,13 @@ export default class User extends Component {
 
         <Stars
           ListFooterComponent={
-            loading && <ActivityIndicator color="#7159c1" size={30} />
+            loading &&
+            !refreshing && <ActivityIndicator color="#7159c1" size={30} />
           }
           onEndReachedThreshold={0.2}
           onEndReached={this.loadRepositories}
+          onRefresh={this.onRefresh}
+          refreshing={refreshing}
           data={stars}
           keyExtractor={star => String(star.id)}
           renderItem={this.renderItem}
