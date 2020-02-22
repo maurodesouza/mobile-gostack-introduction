@@ -31,6 +31,8 @@ export default class Main extends Component {
     newUser: '',
     users: [],
     loading: false,
+    err: false,
+    message: 'Adicionar usuário',
   };
 
   async componentDidMount() {
@@ -52,37 +54,66 @@ export default class Main extends Component {
   handleAddUser = async () => {
     const { users, newUser } = this.state;
 
+    if (!newUser) return null;
+
     this.setState({ loading: true });
 
-    const response = await api.get(`/users/${newUser}`);
+    const userExist = users.find(({ login }) => login === newUser);
 
-    const data = {
-      name: response.data.name,
-      login: response.data.login,
-      bio: response.data.bio,
-      avatar: response.data.avatar_url,
-    };
+    try {
+      if (userExist) throw new Error();
 
-    this.setState({
-      users: [data, ...users],
-      newUser: '',
-      loading: false,
-    });
+      const response = await api.get(`/users/${newUser}`);
 
-    Keyboard.dismiss();
+      const data = {
+        name: response.data.name,
+        login: response.data.login,
+        bio: response.data.bio,
+        avatar: response.data.avatar_url,
+      };
+
+      this.setState({
+        users: [data, ...users],
+        newUser: '',
+        loading: false,
+      });
+
+      return Keyboard.dismiss();
+    } catch (err) {
+      this.setState(
+        {
+          newUser: '',
+          err: true,
+          message: err.request
+            ? 'Usuário não encontrado !'
+            : 'Esse usuário já foi adicionado !',
+        },
+        () => {
+          setTimeout(() => {
+            this.setState({
+              err: false,
+              loading: false,
+              message: 'Adicionar usuário',
+            });
+          }, 1400);
+        }
+      );
+      return null;
+    }
   };
 
   render() {
-    const { users, newUser, loading } = this.state;
+    const { users, newUser, loading, message, err } = this.state;
     const { navigation } = this.props;
 
     return (
       <Container>
         <Form>
           <Input
+            err={err}
             autoCorrect={false}
             autoCapitalize="none"
-            placeholder="Adicionar usuário"
+            placeholder={message}
             value={newUser}
             onChangeText={text => this.setState({ newUser: text })}
             returnKeyType="send"
