@@ -81,10 +81,6 @@ export default class User extends Component {
     );
   };
 
-  webRepository = () => {
-    console.tron.log('Hmm ... Hellow ?');
-  };
-
   render() {
     const { stars, loading, refreshing } = this.state;
     const {
